@@ -1,5 +1,6 @@
 import socket
 import datetime
+import random
 import pytz
 import json
 import socks as socks
@@ -69,11 +70,14 @@ xchat=[ "xchat108","xchat61","xchat94","xchat109","xchat22","xchat47",
         "xchat97","xchat98","xchat99","xchat100","xchat101","xchat102",
         "xchat103","xchat104","xchat105","xchat106","xchat127"]
 
+#FCS.FCVIDEO_TX_IDLE = 0; FCS.FCVIDEO_TX_RESET = 1; FCS.FCVIDEO_TX_AWAY = 2; FCS.FCVIDEO_TX_CONFIRMING = 11; FCS.FCVIDEO_TX_PVT = 12; FCS.FCVIDEO_TX_GRP = 13; FCS.FCVIDEO_TX_CLUB = 14; FCS.FCVIDEO_TX_KILLMODEL = 15; FCS.FCVIDEO_C2C_ON = 20; FCS.FCVIDEO_C2C_OFF = 21; FCS.FCVIDEO_RX_IDLE = 90; FCS.FCVIDEO_RX_PVT = 91; FCS.FCVIDEO_RX_VOY = 92; FCS.FCVIDEO_RX_GRP = 93; FCS.FCVIDEO_RX_CLUB = 94; FCS.FCVIDEO_NULL = 126; FCS.FCVIDEO_OFFLINE = 
+
 video_state={}
 video_state[0]="PUBLIC"
 video_state[2]="AWAY"
 video_state[12]="PVT"
 video_state[13]="GROUP"
+video_state[14]="CLUB"
 video_state[90]="CAM OFF"
 video_state[127]="OFFLINE"
 video_state[128]="TRUEPVT"
@@ -91,6 +95,7 @@ def read_input(prompt):
 def get_chat_host():
         global total_connec
 	global xchat_index
+        xchat_index=random.randint(0, len(xchat))
 	try:
 	        host ="wss://"+str(xchat[xchat_index])+".myfreecams.com:443/fcsl"
 	except:

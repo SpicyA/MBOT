@@ -22,8 +22,7 @@ import random
 from ws4py import configure_logger
 import requests
 from core.mfccuck import main_session
-from core.mfccuck import camgirlslist
-from core.MFCconnect import start_mgr, MFCsockmgr
+from core.MFCconnect import start_mgr
 from core.timezone import *
 from core.cmn import *
 import logging
@@ -240,7 +239,6 @@ def runforever():
 
 
 def init_default():
-	global camgirlslist
 	global Cs_High
 	global Cs_Low
 	Cs_High=6000
@@ -282,11 +280,8 @@ def handle_signal(signum, frame):
 		cli_out("Exiting in %d seconds ..." %i)
 		time.sleep(i)
 	main_session.close_all()
-	MFCsockmgr.close_all()
 	main_session.is_running=0
-	MFCsockmgr.is_running=0
 	main_session.stop()
-	MFCsockmgr.stop()
 	time.sleep(1)
 	print "exiting .."
 	sys.exit()

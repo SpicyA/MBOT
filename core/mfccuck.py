@@ -21,8 +21,8 @@ cg_bans={}
 def main_keep_alive(web_sock):
         print "Starting Keep alive for MFCCUCKmgr\n"
 	while web_sock.is_running == 1:
-		s_time=(math.floor(10 * random.random()) + 10)
-		time.sleep(s_time);
+		#s_time=(math.floor(10 * random.random()) + 10)
+		time.sleep(8);
 		try:
        			for ws in web_sock.websockets.itervalues():
 				if not ws.terminated:
@@ -37,7 +37,6 @@ main_ka_thr.setDaemon(True)
 main_ka_thr.start()
 
 online_camgirls={}
-camgirlslist=[]
 
 current_month=get_date_in_PT_TZ().strftime("%B")
 current_year=get_date_in_PT_TZ().strftime("%Y")
@@ -68,9 +67,6 @@ def connect_xchat_server (camgirl, uid):
 
 
 def end_session(uid):
-	return
-	global lock_online_connect
-	lock_online_connect.acquire()
 	for session in client:
 		if uid == session.mid_camgirl:
 			client.remove(session)
@@ -89,9 +85,7 @@ def end_session(uid):
 				%(session.camgirl, attr.reset))
 			time.sleep(0.1)
 			del session
-			lock_online_connect.release()
 			return 1
-	lock_online_connect.release()
 	return 0
 
 class MFC(WebSocketBaseClient):
@@ -172,8 +166,9 @@ class MFC(WebSocketBaseClient):
 		except:
 			pass
 
-	def connection_closed(self):
+        def closed(self, code, reason):
 		global client
+                print(("Closed down", code, reason))
 		cli_out(fg.green+"Connection to \"%s\" closed%s" % (self.camgirl, attr.reset))
 		if self.Name!=None:
 			del self.g_sid[self.Name]
@@ -272,8 +267,8 @@ class MFC(WebSocketBaseClient):
 		tips=self.tippers[member]
 		tips += tokens
 		self.tippers[member]=tips
-		#buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
-                #print buf
+		buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
+                print buf
                 return
 
 	def update_user_info(self, m):	
@@ -524,8 +519,8 @@ class MFC(WebSocketBaseClient):
 			self.new_camgirl=new_camgirl
 			self.cam_srv = Camserv
 			self.show_camgirl_video_state (vs, truepvt)
-	#		if vs == 0:
-	#			update_last_login_date(usr, camgirl_id)
+                        if vs == 127:
+                            end_session(self.mid_camgirl)
 			return
 
 		return
@@ -764,6 +759,7 @@ class MFC(WebSocketBaseClient):
 							cli_out(fg.red+"Error in closing connection"+attr.reset)
 						pass
 			elif msgtype == 10:
+                                print "10 ... ", Message
 				response_code=int(hdr.group(5))
 				r_code = response_code
 				camgirl_id=int(hdr.group(2))
@@ -804,8 +800,8 @@ class MFC(WebSocketBaseClient):
 				#self.timer_join.cancel()
 				self.joined=1
 				self.guest_conn += 1
-				cli_out(fg.blue+"Joined \"%s's\" chat %d%s"  % 
-					(self.camgirl, self.reconnect,attr.reset))
+				cli_out(fg.blue+"Joined \"%s's\" chat%s"  % 
+					(self.camgirl, attr.reset))
 			elif msgtype == 1:
 				self.sess_id=int(hdr.group(3))
 				self.joined=0
