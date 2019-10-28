@@ -39,7 +39,7 @@ def read_camgirls_list():
                     camgirlslist.append(camgirl.lower())
         file1.close()
 
-def connect_camgirl_room(camgirl, uid):
+def connect_camgirl_room(camgirl, uid, vs, fl):
 	retry = 0
 	is_dup=0
 	for session in client:
@@ -51,7 +51,7 @@ def connect_camgirl_room(camgirl, uid):
 	if is_dup == 1:
 		return
 	while retry < 2:
-		session=connect_xchat_server(camgirl, uid)
+		session=connect_xchat_server(camgirl, uid, vs, fl)
 		if session==None:
 			time.sleep(0.5)
 			New_tor_id()
@@ -168,7 +168,7 @@ def MFCCtl():
                                             '''
                                             online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc]
                                             if nm.lower() in camgirlslist:
-                                                connect_camgirl_room(nm, uid)
+                                                connect_camgirl_room(nm, uid, vs, fl)
                                             i= i + 1
                                 print "Total Models = ", i
                                 print "Total viewers = ", total
