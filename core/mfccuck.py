@@ -223,6 +223,13 @@ class MFC(WebSocketBaseClient):
 		tips=self.tippers[member]
 		tips += tokens
 		self.tippers[member]=tips
+                #ENDPOINT
+                data = {
+                        "modelId": self.mid_camgirl,
+                        "memberid": userid,
+                        "tokens": tokens
+                }
+                APIep.send(data)
 		buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
                 print buf
                 return

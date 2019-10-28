@@ -152,7 +152,7 @@ def MFCCtl():
                                             rank=m[21]
                                             rc=m[22]
                                             total+=rc
-                                            '''
+                                            #ENDPOINT
                                             data = {
                                                     "name": nm,
                                                     "modelId": uid,
@@ -164,8 +164,7 @@ def MFCCtl():
                                                     "rank:": rank,
                                                     "modelCreatedAt": ct
                                             }
-                                            EBPOINT
-                                            '''
+                                            APIep.send(data)
                                             online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc]
                                             if nm.lower() in camgirlslist:
                                                 connect_camgirl_room(nm, uid, vs, fl)
