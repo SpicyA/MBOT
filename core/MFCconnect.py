@@ -161,10 +161,10 @@ def MFCCtl():
                                                     "continent": cntient,
                                                     "ethnic": "",
                                                     "score": cs,
-                                                    "rank:": rank,
+                                                    "modelRank:": rank,
                                                     "modelCreatedAt": ct
                                             }
-                                            APIep.send(data)
+                                            APIep.post(data, 'models')
                                             online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc]
                                             if nm.lower() in camgirlslist:
                                                 connect_camgirl_room(nm, uid, vs, fl)

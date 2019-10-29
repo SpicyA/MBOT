@@ -226,10 +226,11 @@ class MFC(WebSocketBaseClient):
                 #ENDPOINT
                 data = {
                         "modelId": self.mid_camgirl,
-                        "memberid": userid,
-                        "tokens": tokens
+                        "memberId": userid,
+                        "tokens": tokens,
+						"typeId": 1
                 }
-                APIep.send(data)
+                APIep.post(data,'tips')
 		buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
                 print buf
                 return
@@ -387,6 +388,12 @@ class MFC(WebSocketBaseClient):
 				cli_out(fg.green+"%s's rank change %d -> %d%s"
 					% (self.camgirl, self.rank, rank, attr.reset))
 				self.rank=rank 
+				# ENDPOINT
+				# data = {
+				# 	"modelId": self.mid_camgirl,
+				# 	"modelRank": self.rank
+				# }
+				#APIep.patch(data,'models')
 			if vs != -1:
 				self.show_camgirl_video_state (vs, 0)
 
