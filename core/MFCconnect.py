@@ -18,6 +18,8 @@ from core.timezone import *
 from core.cmn import *
 from core.database import Database
 from core.mfccuck import connect_xchat_server
+from core.endpoint import Endpoint
+APIep=Endpoint()
 
 online_camgirls={}
 camgirlslist=[]
@@ -25,7 +27,7 @@ camgirlslist=[]
 def read_camgirls_list():
 	global camgirlslist
         try:
-		file1 = open('models.txt', 'r')
+            file1 = open('models.txt', 'r')
 	except:
 		print "No file models.txt"
 		return
@@ -72,6 +74,7 @@ def online_models_update_thread():
 
 def MFCCtl():
         global camgirlslist
+        global knowncamgirls
         host = "wss://"+random.choice(xchat)+".myfreecams.com:443/fcsl"
         ws = create_connection(host)
         ws.send("fcsws_20180422\n\0")
@@ -138,6 +141,9 @@ def MFCCtl():
                                 info = a['rdata']
                                 i=1
                                 total = 0
+                                # get list of all camgirls API knows about
+                                r = APIep.get({},'models')
+                                knowncamgirls = json.loads(r)
                                 while i < len(info):
                                             m=info[i]
                                             nm=m[0]
@@ -164,7 +170,18 @@ def MFCCtl():
                                                     "modelRank:": rank,
                                                     "modelCreatedAt": ct
                                             }
-                                            APIep.post(data, 'models')
+                                            # search for current uid in allknowncamgirls, only update if camscore changed
+                                            modelfound = False
+                                            for camgirl in knowncamgirls:
+                                                if camgirl['modelId'] == uid:
+                                                    modelfound = True
+                                                    if camgirl['score'] == int(round(cs)):
+                                                        print 'No change for ' + nm
+                                                    else: 
+                                                        APIep.patch(data, 'models')
+                                            # add new model if not found in knowncamgirls
+                                            if modelfound == False:
+                                                APIep.post(data, 'models')
                                             online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc]
                                             if nm.lower() in camgirlslist:
                                                 connect_camgirl_room(nm, uid, vs, fl)
