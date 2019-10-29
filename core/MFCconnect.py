@@ -18,8 +18,6 @@ from core.timezone import *
 from core.cmn import *
 from core.database import Database
 from core.mfccuck import connect_xchat_server
-from core.endpoint import Endpoint
-APIep=Endpoint()
 
 online_camgirls={}
 camgirlslist=[]
