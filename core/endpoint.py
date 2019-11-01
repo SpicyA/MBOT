@@ -20,19 +20,19 @@ class Endpoint():
                 print data
                 return
             r = requests.post(url=self.api+endpoint, data=data) 
-            print(r.text)
+            # print(r.text)
 
         def patch(self,data,endpoint):
             if self.api == None:
                 print data
                 return
             r = requests.patch(url=self.api+endpoint, data=data) 
-            print(r.text)        
+            # print(r.text)        
 
         def get(self,data,endpoint):
             if self.api == None:
                 print data
                 return
             r = requests.get(url=self.api+endpoint) 
-            print(r.text)        
+            # print(r.text)        
             return r.text         

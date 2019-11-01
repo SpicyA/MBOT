@@ -388,12 +388,20 @@ class MFC(WebSocketBaseClient):
 				cli_out(fg.green+"%s's rank change %d -> %d%s"
 					% (self.camgirl, self.rank, rank, attr.reset))
 				self.rank=rank 
-				# ENDPOINT
-				# data = {
-				# 	"modelId": self.mid_camgirl,
-				# 	"modelRank": self.rank
-				# }
-				#APIep.patch(data,'models')
+				#ENDPOINT
+				#Update Model Rank
+				data = {
+					"id": self.mid_camgirl,
+					"modelRank": self.rank
+				}
+    			APIep.patch(data,'models')
+				#Add Rank History
+    			rank = {
+					"modelId": self.mid_camgirl,
+					"modelRank": self.rank,
+					"siteId": 1
+				}
+       			APIep.post(rank,'ranks')
 			if vs != -1:
 				self.show_camgirl_video_state (vs, 0)
 
@@ -697,6 +705,13 @@ class MFC(WebSocketBaseClient):
 						buf=username+"("+str(level)+") has been banned from "+ self.camgirl+"'s room"
 						buf=fg.red+buf+attr.reset
 						print(buf)
+						ban = {
+							"siteId":1,
+							"modelId": self.mid_camgirl,
+							"memberId": self.memberuid,
+							"memberName": username
+						}
+						APIep.post(ban, 'bans')
                                                 self.lastban=username
 					if self.Name == username:
 						cli_out(fg.red+"IP is banned :  "+self.camgirl+\

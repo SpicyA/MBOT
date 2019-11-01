@@ -24,20 +24,25 @@ camgirlslist=[]
 
 def read_camgirls_list():
 	global camgirlslist
+        camgirlslist=[]
         try:
-            file1 = open('models.txt', 'r')
+            r = APIep.get({},'models?limitInfo=1&watch=1')
+            file1 = json.loads(r)
+            # file1 = open('models.txt', 'r')
 	except:
 		print "No file models.txt"
 		return
 
-        file1.seek(0, os.SEEK_SET)
+        # file1.seek(0, os.SEEK_SET)
         for camgirl in file1:
-                camgirl=camgirl.strip('\n')
-                camgirl=camgirl.strip().lower()
+                #camgirl=camgirl.strip('\n')
+                #camgirl=camgirl.strip().lower()
+                camgirl = camgirl['name']
+               
                 if camgirl not in camgirlslist:
-                    print ("Adding \"%s\' to monitor list\n" %(camgirl))
+                    #print ("Adding \"%s\' to monitor list\n" %(camgirl))
                     camgirlslist.append(camgirl.lower())
-        file1.close()
+        # file1.close()
 
 def connect_camgirl_room(camgirl, uid, vs, fl):
 	retry = 0
@@ -68,7 +73,7 @@ def online_models_update_thread():
             MFCCtl()
         except:
             pass
-        time.sleep(300) #every 5 mins
+        time.sleep(90) #every 1.5 min
 
 def MFCCtl():
         global camgirlslist
@@ -140,7 +145,7 @@ def MFCCtl():
                                 i=1
                                 total = 0
                                 # get list of all camgirls API knows about
-                                r = APIep.get({},'models')
+                                r = APIep.get({},'models?limitInfo=1')
                                 knowncamgirls = json.loads(r)
                                 while i < len(info):
                                             m=info[i]
@@ -158,6 +163,7 @@ def MFCCtl():
                                             total+=rc
                                             #ENDPOINT
                                             data = {
+                                                    "id": uid,
                                                     "name": nm,
                                                     "modelId": uid,
                                                     "siteId": "1",
@@ -171,11 +177,9 @@ def MFCCtl():
                                             # search for current uid in allknowncamgirls, only update if camscore changed
                                             modelfound = False
                                             for camgirl in knowncamgirls:
-                                                if camgirl['modelId'] == uid:
+                                                if camgirl['id'] == uid:
                                                     modelfound = True
-                                                    if camgirl['score'] == int(round(cs)):
-                                                        print 'No change for ' + nm
-                                                    else: 
+                                                    if camgirl['score'] != int(round(cs)):
                                                         APIep.patch(data, 'models')
                                             # add new model if not found in knowncamgirls
                                             if modelfound == False:
@@ -186,6 +190,13 @@ def MFCCtl():
                                             i= i + 1
                                 print "Total Models = ", i
                                 print "Total viewers = ", total
+                                stat = {
+                                    "id": uid,
+                                    "models": i,
+                                    "members": total,
+                                    "siteId": "1",
+                                }
+                                APIep.post(stat, 'stats')
                                 quitting=1
 
                         sock_buf=sock_buf[6+mlen:]
