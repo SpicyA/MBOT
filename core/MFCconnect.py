@@ -40,16 +40,14 @@ def read_camgirls_list():
         file1.close()
 
 def connect_camgirl_room(camgirl, uid, vs, fl):
+        global total_connections
 	retry = 0
 	is_dup=0
 	for session in client:
 		if session.camgirl.lower() == camgirl.lower():
-			cli_out(fg.red+"Active session for camgirl '%s' is running%s" 
-					%(camgirl, attr.reset))
-			is_dup=1
-			break
-	if is_dup == 1:
-		return
+			#cli_out(fg.red+"Active session for camgirl '%s' is running%s" 
+			#		%(camgirl, attr.reset))
+			return
 	while retry < 2:
 		session=connect_xchat_server(camgirl, uid, vs, fl)
 		if session==None:
@@ -173,9 +171,7 @@ def MFCCtl():
                                             for camgirl in knowncamgirls:
                                                 if camgirl['modelId'] == uid:
                                                     modelfound = True
-                                                    if camgirl['score'] == int(round(cs)):
-                                                        print 'No change for ' + nm
-                                                    else: 
+                                                    if camgirl['score'] != int(round(cs)):
                                                         APIep.patch(data, 'models')
                                             # add new model if not found in knowncamgirls
                                             if modelfound == False:
