@@ -23,7 +23,7 @@ def main_keep_alive(web_sock):
         print "Starting Keep alive for MFCCUCKmgr\n"
 	while web_sock.is_running == 1:
 		#s_time=(math.floor(10 * random.random()) + 10)
-		time.sleep(8);
+		time.sleep(5);
 		try:
        			for ws in web_sock.websockets.itervalues():
 				if not ws.terminated:
@@ -168,7 +168,6 @@ class MFC(WebSocketBaseClient):
 		time.sleep(0.3)
 		if self.exit_session == 0:
 			cli_out(fg.green+"Re-Connecting to %s ... %s" % (self.camgirl, attr.reset))
-			host = get_chat_host()
 			try:
                                 connect_xchat_server(self.camgirl, self.mid_camgirl, self.cam_state, self.flags)
 			except:
@@ -231,8 +230,8 @@ class MFC(WebSocketBaseClient):
 						"typeId": 1
                 }
                 APIep.post(data,'tips')
-		buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
-                print buf
+		#buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
+                #print buf
                 return
 
 	def update_user_info(self, m):	
@@ -717,11 +716,7 @@ class MFC(WebSocketBaseClient):
 						cli_out(fg.red+"IP is banned :  "+self.camgirl+\
 							"'s room .. closing connection: "+ attr.reset)
 						try:
-							if enable_tor == 1:
-								New_tor_id()
-								self.exit_session=0
-							else:
-								self.exit_session=1
+							self.exit_session=1
 							self.session_IO=0
 							self.ws_main.send("98 0 0 0 0 -\n\0")
 							self.ws_main.close()

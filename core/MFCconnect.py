@@ -45,16 +45,14 @@ def read_camgirls_list():
         # file1.close()
 
 def connect_camgirl_room(camgirl, uid, vs, fl):
+        global total_connections
 	retry = 0
 	is_dup=0
 	for session in client:
 		if session.camgirl.lower() == camgirl.lower():
-			cli_out(fg.red+"Active session for camgirl '%s' is running%s" 
-					%(camgirl, attr.reset))
-			is_dup=1
-			break
-	if is_dup == 1:
-		return
+			#cli_out(fg.red+"Active session for camgirl '%s' is running%s" 
+			#		%(camgirl, attr.reset))
+			return
 	while retry < 2:
 		session=connect_xchat_server(camgirl, uid, vs, fl)
 		if session==None:
