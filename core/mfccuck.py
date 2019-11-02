@@ -650,7 +650,8 @@ class MFC(WebSocketBaseClient):
         		if len(Message) < msg_len:
 			    self.rembuf=''.join(data)
 			    break
-			if msgtype == 0 or msgtype == 64 or msgtype == 4 or msgtype == 43 or msgtype == 44:
+                        if msgtype in [ 0, 64, 4, 43, 44, 50]:
+                                #print "skip ", msgtype
 				data=data[6+msg_len:]
 				if len(data) == 0:
 					break
