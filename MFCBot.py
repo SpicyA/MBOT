@@ -7,10 +7,6 @@ import time
 import traceback
 import urllib
 import sys
-import socket
-import socks
-#socks.set_default_proxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9099)
-#socket.socket = socks.socksocket
 from core.mfccuck import main_session, start_cuckmgr, connect_xchat_server
 from core.MFCconnect import start_mgr, record_stats
 from core.timezone import *
@@ -205,7 +201,7 @@ def init_default():
 	global Cs_Low
 	Cs_High=6000
 	Cs_Low=50
-        #logger = configure_logger(level=logging.INFO)
+        logger = configure_logger(level=logging.INFO)
         logging.basicConfig()
 
 
@@ -227,10 +223,12 @@ def stack_trace_dump():
 def handle_signal(signum, frame):
         stack_trace_dump()
 	cli_out("Session Interrupted %d" % signum)
-	main_session.close_all()
-	main_session.is_running=0
+        for session in client:
+                session.close_session()
 	cli_out("Exiting in 10 seconds ...")
 	time.sleep(10)
+	main_session.close_all()
+	main_session.is_running=0
 	main_session.stop()
 	sys.exit()
 

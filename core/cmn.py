@@ -3,9 +3,14 @@ import datetime
 import random
 import pytz
 import json
+import socket
 import socks as socks
 import time
 from core.endpoint import Endpoint
+
+socks.set_default_proxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9099)
+socket.socket = socks.socksocket
+
 APIep=Endpoint()
 
 
@@ -110,13 +115,15 @@ def get_chat_host():
 	global xchat_index
 	try:
 	        host ="wss://"+str(xchat[xchat_index])+".myfreecams.com:443/fcsl"
+	        host ="ws://"+str(xchat[xchat_index])+".myfreecams.com:8080/fcsl"
 	except:
 		xchat_index = 0
 	        host ="wss://"+str(xchat[xchat_index])+".myfreecams.com:443/fcsl"
+	        host ="ws://"+str(xchat[xchat_index])+".myfreecams.com:8080/fcsl"
         print host
 	xchat_index += 1
 	total_connec += 1
-	if total_connec % 10 == 0:
+	if total_connec % 15 == 0:
 		New_tor_id()
 		time.sleep(2)
 	if xchat_index >= len(xchat):
