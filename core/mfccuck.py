@@ -222,17 +222,17 @@ class MFC(WebSocketBaseClient):
 		tips=self.tippers[member]
 		tips += tokens
 		self.tippers[member]=tips
-                #ENDPOINT
-                data = {
-                        "modelId": self.mid_camgirl,
-                        "memberId": userid,
-                        "tokens": tokens,
-						"typeId": 1
-                }
-                APIep.post(data,'tips')
+		#ENDPOINT
+		data = {
+			"modelId": self.mid_camgirl,
+			"memberId": userid,
+			"tokens": tokens,
+			"typeId": 1
+		}
+		APIep.post(data,'tips')
 		#buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
-                #print buf
-                return
+		#print buf
+		return
 
 	def update_user_info(self, m):	
 		u_info = self.do_process_json_message(m)
@@ -393,14 +393,14 @@ class MFC(WebSocketBaseClient):
 					"id": self.mid_camgirl,
 					"modelRank": self.rank
 				}
-    			APIep.patch(data,'models')
+				APIep.patch(data,'models')
 				#Add Rank History
-    			rank = {
+				rank = {
 					"modelId": self.mid_camgirl,
 					"modelRank": self.rank,
 					"siteId": 1
 				}
-       			APIep.post(rank,'ranks')
+				APIep.post(rank,'ranks')
 			if vs != -1:
 				self.show_camgirl_video_state (vs, 0)
 
