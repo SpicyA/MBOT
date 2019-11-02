@@ -21,6 +21,8 @@ from core.mfccuck import connect_xchat_server
 
 online_camgirls={}
 camgirlslist=[]
+modelsonline=0
+membersonline=0
 
 def read_camgirls_list():
 	global camgirlslist
@@ -73,9 +75,33 @@ def online_models_update_thread():
             pass
         time.sleep(90) #every 1.5 min
 
+def record_stats():
+    while True:
+        try:     
+            record_stat()
+        except:
+            pass
+        time.sleep(1200) #every 20 mins
+
+def record_stat():
+    global modelsonline
+    global membersonline
+    try:
+        if modelsonline > 0 or membersonline > 0:
+            stat = {
+                "siteId": 1, 
+                "models": modelsonline,
+                "members": membersonline
+            }
+            APIep.post(stat, 'stats')
+    except Exception as e: print(e)
+    pass
+
 def MFCCtl():
         global camgirlslist
         global knowncamgirls
+        global membersonline
+        global modelsonline
         host = "wss://"+random.choice(xchat)+".myfreecams.com:443/fcsl"
         ws = create_connection(host)
         ws.send("fcsws_20180422\n\0")
@@ -188,13 +214,8 @@ def MFCCtl():
                                             i= i + 1
                                 print "Total Models = ", i
                                 print "Total viewers = ", total
-                                stat = {
-                                    "id": uid,
-                                    "models": i,
-                                    "members": total,
-                                    "siteId": "1",
-                                }
-                                APIep.post(stat, 'stats')
+                                membersonline=total
+                                modelsonline=i
                                 quitting=1
 
                         sock_buf=sock_buf[6+mlen:]
@@ -207,3 +228,6 @@ def start_mgr():
     MFCkathread=threading.Thread(target=online_models_update_thread)
     MFCkathread.setDaemon(True)
     MFCkathread.start()
+    stats=threading.Thread(target=record_stats)
+    stats.setDaemon(True)
+    stats.start()

@@ -12,7 +12,7 @@ import socks
 #socks.set_default_proxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9099)
 #socket.socket = socks.socksocket
 from core.mfccuck import main_session, start_cuckmgr, connect_xchat_server
-from core.MFCconnect import start_mgr
+from core.MFCconnect import start_mgr, record_stats
 from core.timezone import *
 from core.cmn import *
 import json
