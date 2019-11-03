@@ -13,6 +13,7 @@ import socket
 import json
 import requests
 import random
+import copy
 from websocket import create_connection
 from core.timezone import *
 from core.cmn import *
@@ -25,8 +26,10 @@ modelsonline=0
 membersonline=0
 knowncamgirls={}
 online_models_update_thread_interval=90
-api_models_update_thread_interval=95
+api_models_update_thread_interval=180
+api_models_update_thread_initial_wait=10
 api_record_stats_thread_interval=1200
+simulate_slow_tor_connection=False
 
 
 def read_camgirls_list():
@@ -206,6 +209,7 @@ def api_record_stats():
 
 def api_models_update_thread():
     global api_models_update_thread_interval
+    time.sleep(api_models_update_thread_initial_wait) # initially give online_camgirls some time to populate
     while True:
         try:     
             api_models_update()
@@ -219,24 +223,25 @@ def api_models_update():
     modelsinserted = 0
     modelsskipped = 0
     
-    print 'Starting API model update...'
+    print 'Starting API model update... \n'
     if len(knowncamgirls) == 0:
-        print 'Getting all known models from API...'
+        print 'Getting all known models from API... \n'
         r = APIep.get({},'models?limitInfo=1')
         knowncamgirlsjson = json.loads(r)
         # convert response to indexed dict
         for girl in knowncamgirlsjson:
             knowncamgirls[girl['id']] = [girl['name'], girl['score']] # {5531429: [u'sweetchanel4u', 107]
-
-    for girl in online_camgirls:
+        print len(knowncamgirls), 'were retrieved from API... \n'
+    online_camgirls_copy = copy.deepcopy(online_camgirls)
+    for girl in online_camgirls_copy:
         # print girl '44212343'
         # print online_camgirls[girl] [u'Liceth26', 0, 'Nov 06,2018', 478.4, 539680, 0, 2, 'US']
         id = girl
-        name = online_camgirls[girl][0]
-        score = online_camgirls[girl][3]
-        rank = online_camgirls[girl][5]
-        createdAt = online_camgirls[girl][2]
-        continent = online_camgirls[girl][7]
+        name = online_camgirls_copy[girl][0]
+        score = online_camgirls_copy[girl][3]
+        rank = online_camgirls_copy[girl][5]
+        createdAt = online_camgirls_copy[girl][2]
+        continent = online_camgirls_copy[girl][7]
         data = {
             "id": id,
             "name": name,
@@ -250,20 +255,25 @@ def api_models_update():
             knowncamgirls[id]
         except:
             # Insert new model
+            if simulate_slow_tor_connection:
+                time.sleep(1.5)
             APIep.post(data, 'models')
-            knowncamgirls[girl]=[name, score]
+            knowncamgirls[id]=[name, score]
             modelsinserted+=1
             continue
         # check if the lastest info matches what we have
-        if int(round(score)) == knowncamgirls[girl][1]:
+        if int(round(score)) == knowncamgirls[id][1]:
             modelsskipped+=1
         else:
-            # print 'update this one'
+            # Update model
+            if simulate_slow_tor_connection:
+                time.sleep(1.5)
             APIep.patch(data, 'models')
-            knowncamgirls[girl]=[name, (round(score))]
+            knowncamgirls[id]=[name, (round(score))]
             modelsupdated+=1
             
-    print 'Inserted ', modelsinserted, ' | ', 'Updated ', modelsupdated, ' | ', 'Skipped ', modelsskipped
+    if len(online_camgirls_copy):
+        print 'Inserted ', modelsinserted, ' | ', 'Updated ', modelsupdated, ' | ', 'Skipped ', modelsskipped
 
 def start_mgr():
     MFCkathread=threading.Thread(target=online_models_update_thread)
