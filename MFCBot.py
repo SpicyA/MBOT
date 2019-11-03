@@ -8,7 +8,7 @@ import traceback
 import urllib
 import sys
 from core.mfccuck import main_session, start_cuckmgr, connect_xchat_server
-from core.MFCconnect import start_mgr, record_stats
+from core.MFCconnect import start_mgr
 from core.timezone import *
 from core.cmn import *
 import json
@@ -26,7 +26,6 @@ def session_info_header():
 	cli_out(fg.red+"** Active Session(s) **"+attr.reset)
 	cli_out("%-05s     %-10s" % ("Id", "Name"))
 	cli_out(fg.red+"***********************"+attr.reset)
-
 
 def process_global_commands(line):
 	global client
@@ -195,7 +194,6 @@ def runforever():
 				print ("trace back : ", var)
 				print ("------------------------------------------")
 
-
 def init_default():
 	global Cs_High
 	global Cs_Low
@@ -203,7 +201,6 @@ def init_default():
 	Cs_Low=50
         logger = configure_logger(level=logging.INFO)
         logging.basicConfig()
-
 
 def stack_trace_dump():
 	print >> sys.stderr, "\n*** STACKTRACE - START ***\n"
