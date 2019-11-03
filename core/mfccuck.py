@@ -161,6 +161,15 @@ class MFC(WebSocketBaseClient):
                     print("%s was in %sPVT for %s (%d tokens)" 
                                             %(self.camgirl, buf, timebuf, tokens))
                     #ENDPOINT
+                    tip = {
+                        "tokens": tokens,
+                        "memberName": "",
+                        "memberId": self.memberuid,
+                        "modelId": self.mid_camgirl,
+                        "siteId": 1,
+                        "typeId": 3
+                    }
+                    APIep.post(tip, 'tips')
 		if self.Name!=None:
 			del self.g_sid[self.Name]
 		now = int(time.time())
@@ -226,12 +235,14 @@ class MFC(WebSocketBaseClient):
 		data = {
 			"modelId": self.mid_camgirl,
 			"memberId": userid,
+			"memberName":"",
 			"tokens": tokens,
-			"typeId": 1
+			"typeId": 1,
+			"siteId": 1
 		}
 		APIep.post(data,'tips')
-		#buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
-		#print buf
+		buf="%s has tipped %s %s tokens" % (member, self.camgirl, tokens)
+		print buf
 		return
 
 	def update_user_info(self, m):	
@@ -507,6 +518,15 @@ class MFC(WebSocketBaseClient):
                                     print("%s was in %sPVT for %s (%d tokens)" 
                                                 %(self.camgirl, buf, timebuf, tokens))
                                     #ENDPOINT
+                                    tip = {
+										"tokens": tokens,
+										"memberName": "",
+										"memberId": self.memberuid,
+										"modelId": self.mid_camgirl,
+										"siteId": 1,
+										"typeId": 4
+									}
+                                    APIep.post(tip, 'tips')
 				if st == 0 or st == 12 or st == 13 or st == 14:
 					cli_out(fg.red+attr.bold+"%s is in %s%s" 
 						% (self.camgirl, state, attr.reset))
