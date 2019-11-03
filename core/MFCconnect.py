@@ -23,6 +23,11 @@ online_camgirls={}
 camgirlslist=[]
 modelsonline=0
 membersonline=0
+knowncamgirls={}
+online_models_update_thread_interval=20
+api_models_update_thread_interval=25
+api_record_stats_thread_interval=1200
+
 
 def read_camgirls_list():
 	global camgirlslist
@@ -67,39 +72,17 @@ def connect_camgirl_room(camgirl, uid, vs, fl):
 	return None
 
 def online_models_update_thread():
+    global online_models_update_thread_interval
     while True:
         read_camgirls_list()
         try:
             MFCCtl()
         except:
             pass
-        time.sleep(90) #every 1.5 min
-
-def record_stats():
-    while True:
-        try:     
-            record_stat()
-        except:
-            pass
-        time.sleep(1200) #every 20 mins
-
-def record_stat():
-    global modelsonline
-    global membersonline
-    try:
-        if modelsonline > 0 or membersonline > 0:
-            stat = {
-                "siteId": 1, 
-                "models": modelsonline,
-                "members": membersonline
-            }
-            APIep.post(stat, 'stats')
-    except Exception as e: print(e)
-    pass
+        time.sleep(online_models_update_thread_interval)
 
 def MFCCtl():
         global camgirlslist
-        global knowncamgirls
         global membersonline
         global modelsonline
         host = "wss://"+random.choice(xchat)+".myfreecams.com:443/fcsl"
@@ -168,9 +151,6 @@ def MFCCtl():
                                 info = a['rdata']
                                 i=1
                                 total = 0
-                                # get list of all camgirls API knows about
-                                r = APIep.get({},'models?limitInfo=1')
-                                knowncamgirls = json.loads(r)
                                 while i < len(info):
                                             m=info[i]
                                             nm=m[0]
@@ -185,30 +165,7 @@ def MFCCtl():
                                             rank=m[21]
                                             rc=m[22]
                                             total+=rc
-                                            #ENDPOINT
-                                            data = {
-                                                    "id": uid,
-                                                    "name": nm,
-                                                    "modelId": uid,
-                                                    "siteId": "1",
-                                                    "country": "",
-                                                    "continent": cntient,
-                                                    "ethnic": "",
-                                                    "score": cs,
-                                                    "modelRank:": rank,
-                                                    "modelCreatedAt": ct
-                                            }
-                                            # search for current uid in allknowncamgirls, only update if camscore changed
-                                            modelfound = False
-                                            for camgirl in knowncamgirls:
-                                                if camgirl['id'] == uid:
-                                                    modelfound = True
-                                                    if camgirl['score'] != int(round(cs)):
-                                                        APIep.patch(data, 'models')
-                                            # add new model if not found in knowncamgirls
-                                            if modelfound == False:
-                                                APIep.post(data, 'models')
-                                            online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc]
+                                            online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc, cntient]
                                             if nm.lower() in camgirlslist:
                                                 connect_camgirl_room(nm, uid, vs, fl)
                                             i= i + 1
@@ -224,10 +181,97 @@ def MFCCtl():
                                 break
         ws.close()
 
+def api_record_stats_thread():
+    global api_record_stats_thread_interval
+    while True:
+        try:     
+            api_record_stats()
+        except:
+            pass
+        time.sleep(api_record_stats_thread_interval)
+
+def api_record_stats():
+    global modelsonline
+    global membersonline
+    try:
+        if modelsonline > 0 or membersonline > 0:
+            stat = {
+                "siteId": 1, 
+                "models": modelsonline,
+                "members": membersonline
+            }
+            APIep.post(stat, 'stats')
+    except Exception as e: print(e)
+    pass
+
+def api_models_update_thread():
+    global api_models_update_thread_interval
+    while True:
+        try:     
+            api_models_update()
+        except:
+            pass
+        time.sleep(api_models_update_thread_interval) 
+
+def api_models_update():
+    global knowncamgirls
+    modelsupdated = 0
+    modelsinserted = 0
+    modelsskipped = 0
+    
+    print 'Starting API model update...'
+    if len(knowncamgirls) == 0:
+        print 'Getting all known models from API...'
+        r = APIep.get({},'models?limitInfo=1')
+        knowncamgirlsjson = json.loads(r)
+        # convert response to indexed dict
+        for girl in knowncamgirlsjson:
+            knowncamgirls[girl['id']] = [girl['name'], girl['score']] # {5531429: [u'sweetchanel4u', 107]
+
+    for girl in online_camgirls:
+        # print girl '44212343'
+        # print online_camgirls[girl] [u'Liceth26', 0, 'Nov 06,2018', 478.4, 539680, 0, 2, 'US']
+        id = girl
+        name = online_camgirls[girl][0]
+        score = online_camgirls[girl][3]
+        rank = online_camgirls[girl][5]
+        createdAt = online_camgirls[girl][2]
+        continent = online_camgirls[girl][7]
+        data = {
+            "id": id,
+            "name": name,
+            "siteId": "1",
+            "continent": continent,
+            "score": score,
+            "modelRank:": rank,
+            "modelCreatedAt": createdAt,
+        }
+        try: 
+            knowncamgirls[id]
+        except:
+            # Insert new model
+            APIep.post(data, 'models')
+            knowncamgirls[girl]=[name, score]
+            modelsinserted+=1
+            continue
+        # check if the lastest info matches what we have
+        if int(round(score)) == knowncamgirls[girl][1]:
+            modelsskipped+=1
+        else:
+            # print 'update this one'
+            APIep.patch(data, 'models')
+            knowncamgirls[girl]=[name, (round(score))]
+            modelsupdated+=1
+            
+    print 'Inserted ', modelsinserted, ' | ', 'Updated ', modelsupdated, ' | ', 'Skipped ', modelsskipped
+
 def start_mgr():
     MFCkathread=threading.Thread(target=online_models_update_thread)
     MFCkathread.setDaemon(True)
     MFCkathread.start()
-    stats=threading.Thread(target=record_stats)
+    stats=threading.Thread(target=api_record_stats_thread)
     stats.setDaemon(True)
     stats.start()
+    models=threading.Thread(target=api_models_update_thread)
+    models.setDaemon(True)
+    models.start()
