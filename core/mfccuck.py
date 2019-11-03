@@ -725,6 +725,7 @@ class MFC(WebSocketBaseClient):
 						buf=username+"("+str(level)+") has been banned from "+ self.camgirl+"'s room"
 						buf=fg.red+buf+attr.reset
 						print(buf)
+						# ENDPOINT
 						ban = {
 							"siteId":1,
 							"modelId": self.mid_camgirl,
