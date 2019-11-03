@@ -24,8 +24,8 @@ camgirlslist=[]
 modelsonline=0
 membersonline=0
 knowncamgirls={}
-online_models_update_thread_interval=20
-api_models_update_thread_interval=25
+online_models_update_thread_interval=90
+api_models_update_thread_interval=95
 api_record_stats_thread_interval=1200
 
 
