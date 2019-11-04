@@ -168,8 +168,9 @@ def process_global_commands(line):
 							else:
 								session.close_session()
 			elif line[1]=='q':
-				key=read_input(fg.red+"Do you really want to exit program ? <y/n> : "+attr.reset)
-				if len(key) > 0 and key[0] == 'y':
+				# turn off confirmation for now
+				#key=read_input(fg.red+"Do you really want to exit program ? <y/n> : "+attr.reset)
+				#if len(key) > 0 and key[0] == 'y':
 					handle_signal (0,0)
 			else:
 				cli_out(help_string)
