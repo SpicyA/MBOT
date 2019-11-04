@@ -27,9 +27,9 @@ membersonline=0
 knowncamgirls={}
 online_models_update_thread_interval=90
 api_models_update_thread_interval=180
-api_models_update_thread_initial_wait=10
+api_initial_wait=20
 api_record_stats_thread_interval=1200
-api_models_online_aggr_thread_interval=60
+api_models_online_aggr_thread_interval=100
 simulate_slow_tor_connection=False
 
 
@@ -183,6 +183,7 @@ def MFCCtl():
 
 def api_record_stats_thread():
     global api_record_stats_thread_interval
+    time.sleep(api_initial_wait) # initially give online_camgirls some time to populate
     while True:
         try:     
             api_record_stats()
@@ -206,7 +207,7 @@ def api_record_stats():
 
 def api_models_update_thread():
     global api_models_update_thread_interval
-    time.sleep(api_models_update_thread_initial_wait) # initially give online_camgirls some time to populate
+    time.sleep(api_initial_wait) # initially give online_camgirls some time to populate
     while True:
         try:     
             api_models_update()
@@ -220,15 +221,15 @@ def api_models_update():
     modelsinserted = 0
     modelsskipped = 0
     
-    print 'Starting API model update... \n'
+    print 'Starting API model update...'
     if len(knowncamgirls) == 0:
-        print 'Getting all known models from API... \n'
+        print 'Getting all known models from API...'
         r = APIep.get({},'models?limitInfo=1')
         knowncamgirlsjson = json.loads(r)
         # convert response to indexed dict
         for girl in knowncamgirlsjson:
             knowncamgirls[girl['id']] = [girl['name'], girl['score']] # {5531429: [u'sweetchanel4u', 107]
-        print len(knowncamgirls), 'were retrieved from API... \n'
+        print len(knowncamgirls), 'models retrieved from API...'
     online_camgirls_copy = copy.deepcopy(online_camgirls)
     for girl in online_camgirls_copy:
         # print girl '44212343'
@@ -274,6 +275,7 @@ def api_models_update():
 
 def api_models_online_aggr_thread():
     global api_models_online_aggr_thread_interval
+    time.sleep(api_initial_wait) # initially give online_camgirls some time to populate
     while True:
         try:     
             api_models_online_aggr()
