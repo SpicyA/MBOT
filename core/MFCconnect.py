@@ -21,7 +21,7 @@ from core.database import Database
 from core.mfccuck import connect_xchat_server
 
 online_camgirls={}
-camgirlslist=[]
+watchcamgirls={}
 modelsonline=0
 membersonline=0
 knowncamgirls={}
@@ -33,26 +33,21 @@ simulate_slow_tor_connection=False
 
 
 def read_camgirls_list():
-	global camgirlslist
-        camgirlslist=[]
+	global watchcamgirls
+        watchcamgirls={}
         try:
             r = APIep.get({},'models?limitInfo=1&watch=1')
-            file1 = json.loads(r)
-            # file1 = open('models.txt', 'r')
-	except:
-		print "No file models.txt"
-		return
-
-        # file1.seek(0, os.SEEK_SET)
-        for camgirl in file1:
-                #camgirl=camgirl.strip('\n')
-                #camgirl=camgirl.strip().lower()
-                camgirl = camgirl['name']
-               
-                if camgirl not in camgirlslist:
-                    #print ("Adding \"%s\' to monitor list\n" %(camgirl))
-                    camgirlslist.append(camgirl.lower())
-        # file1.close()
+            rj = json.loads(r)
+            # convert response
+            for girl in rj:
+                watchcamgirls[girl['id']]=[girl['name'],girl['score']]
+                t = client
+                t = 'test'
+                #print ("Adding \"%s\' to monitor list\n" %(camgirl))
+        except:
+		    print "Error connecting to API"
+            # todo: re add the logic to read from a file if API is not configured
+		    return
 
 def connect_camgirl_room(camgirl, uid, vs, fl):
         global total_connections
@@ -169,15 +164,20 @@ def MFCCtl():
                                             rc=m[22]
                                             total+=rc
                                             online_camgirls[uid]=[nm , vs, ct, cs, fl, rank, rc, cntient]
-                                            if nm.lower() in camgirlslist:
+                                            if uid in watchcamgirls:
                                                 connect_camgirl_room(nm, uid, vs, fl)
                                             i= i + 1
+                                            # test
                                 print "Total Models = ", i
                                 print "Total viewers = ", total
                                 membersonline=total
                                 modelsonline=i
                                 quitting=1
-
+                                # disconnect from sessions no longer wanted
+                                for session in client:
+                                    if session.mid_camgirl not in watchcamgirls:
+                                        session.close_session()
+                                        
                         sock_buf=sock_buf[6+mlen:]
 
                         if len(sock_buf) == 0:
