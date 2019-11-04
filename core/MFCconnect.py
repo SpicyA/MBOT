@@ -29,6 +29,7 @@ online_models_update_thread_interval=90
 api_models_update_thread_interval=180
 api_models_update_thread_initial_wait=10
 api_record_stats_thread_interval=1200
+api_models_online_aggr_thread_interval=60
 simulate_slow_tor_connection=False
 
 
@@ -78,7 +79,6 @@ def online_models_update_thread():
         time.sleep(online_models_update_thread_interval)
 
 def MFCCtl():
-        global camgirlslist
         global membersonline
         global modelsonline
         host = "wss://"+random.choice(xchat)+".myfreecams.com:443/fcsl"
@@ -175,7 +175,6 @@ def MFCCtl():
                                 for session in client:
                                     if session.mid_camgirl not in watchcamgirls:
                                         session.close_session()
-                                        
                         sock_buf=sock_buf[6+mlen:]
 
                         if len(sock_buf) == 0:
@@ -273,6 +272,32 @@ def api_models_update():
     if len(online_camgirls_copy):
         print 'Inserted ', modelsinserted, ' | ', 'Updated ', modelsupdated, ' | ', 'Skipped ', modelsskipped
 
+def api_models_online_aggr_thread():
+    global api_models_online_aggr_thread_interval
+    while True:
+        try:     
+            api_models_online_aggr()
+        except:
+            pass
+        time.sleep(api_models_online_aggr_thread_interval)
+
+def api_models_online_aggr():
+    global online_camgirls
+    if not len(online_camgirls):
+        return
+    try:
+        modelsonlinelist = []
+        for girl in online_camgirls:
+            modelsonlinelist.append(girl)
+        aggr = {
+            "name": "models",
+            "idList": str(modelsonlinelist).strip('[]')
+        }
+        if len(modelsonlinelist):
+            APIep.post(aggr, 'aggr')
+    except Exception as e: print(e)
+    pass
+
 def start_mgr():
     MFCkathread=threading.Thread(target=online_models_update_thread)
     MFCkathread.setDaemon(True)
@@ -283,3 +308,6 @@ def start_mgr():
     models=threading.Thread(target=api_models_update_thread)
     models.setDaemon(True)
     models.start()
+    api_models_online_aggr=threading.Thread(target=api_models_online_aggr_thread)
+    api_models_online_aggr.setDaemon(True)
+    api_models_online_aggr.start()
