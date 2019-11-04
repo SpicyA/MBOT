@@ -41,8 +41,6 @@ def read_camgirls_list():
             # convert response
             for girl in rj:
                 watchcamgirls[girl['id']]=[girl['name'],girl['score']]
-                t = client
-                t = 'test'
                 #print ("Adding \"%s\' to monitor list\n" %(camgirl))
         except:
 		    print "Error connecting to API"
